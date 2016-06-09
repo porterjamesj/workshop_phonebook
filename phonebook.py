@@ -5,6 +5,16 @@ import os
 import sys
 
 
+def check_phonebook_existence(f):
+    def wrapper(*args):
+        phonebook = args[-1]
+        if not os.path.isfile(phonebook + ".pb"):
+            print "Phonebook does not exists!"
+            exit(1)
+        return f(*args)
+    return wrapper
+
+
 def create(phonebook):
     if os.path.isfile(phonebook + ".pb"):
         print "Phonebook already exists!"
@@ -14,13 +24,15 @@ def create(phonebook):
     print "{} created".format(phonebook)
 
 
+def names_and_numbers(f):
+    for line in f:
+        yield line.strip().split(":")
+
+
+@check_phonebook_existence
 def add(name, number, phonebook):
-    if not os.path.isfile(phonebook + ".pb"):
-        print "Phonebook does not exist!"
-        exit(1)
     f = open(phonebook + ".pb", "r+w")
-    for line in f.readlines():
-        line_name, line_number = line.strip().split(":")
+    for line_name, line_number in names_and_numbers(f):
         if line_name == name:
             print "Error: name already exists: {}".format(
                 name
@@ -32,13 +44,10 @@ def add(name, number, phonebook):
     print "{} added with number {}".format(name, number)
 
 
+@check_phonebook_existence
 def lookup(name, phonebook):
-    if not os.path.isfile(phonebook + ".pb"):
-        print "Phonebook does not exist!"
-        exit(1)
     f = open(phonebook + ".pb")
-    for line in f.readlines():
-        line_name, line_number = line.strip().split(":")
+    for line_name, line_number in names_and_numbers(f):
         if line_name == name:
             print "Phone number for {} is: {}".format(
                 line_name, line_number
@@ -49,14 +58,10 @@ def lookup(name, phonebook):
     f.close()
     exit(1)
 
-
+@check_phonebook_existence
 def reverse_lookup(number, phonebook):
-    if not os.path.isfile(phonebook + ".pb"):
-        print "Phonebook does not exist!"
-        exit(1)
     f = open(phonebook + ".pb")
-    for line in f.readlines():
-        line_name, line_number = line.strip().split(":")
+    for line_name, line_number in names_and_numbers(f):
         if line_number == number:
             print "Name for {} is: {}".format(
                 line_number, line_name
@@ -68,19 +73,17 @@ def reverse_lookup(number, phonebook):
     exit(1)
 
 
+@check_phonebook_existence
 def show(phonebook):
-    if not os.path.isfile(phonebook + ".pb"):
-        print "Phonebook does not exist!"
-        exit(1)
     f = open(phonebook + ".pb")
     table_cells = [["Name", "Number"]]
-    for line in f.readlines():
-        cell = list(line.strip().split(":"))
-        table_cells.append(cell)
+    table_cells += list(names_and_numbers(f))
     table = AsciiTable(table_cells)
     print table.table
     exit(0)
 
+
+# parseing arguments
 
 CMDS = {
     "create": create,
