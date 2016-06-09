@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from terminaltables import AsciiTable
 import os
 import sys
@@ -9,6 +11,7 @@ def create(phonebook):
         exit(1)
     f = open(phonebook + ".pb", "w")
     f.close()
+    print "{} created".format(phonebook)
 
 
 def add(name, number, phonebook):
@@ -26,6 +29,7 @@ def add(name, number, phonebook):
             exit(1)
     f.write(name + ":" + number + "\n")
     f.close()
+    print "{} added with number {}".format(name, number)
 
 
 def lookup(name, phonebook):
